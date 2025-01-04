@@ -676,19 +676,8 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
       double height = 15; // Fixed height for the gradient square
       double trackballRadius = 8; // Radius of the trackball
       double trackballDiameter = trackballRadius * 2;
-      final lowColor = Color.from(
-        alpha: 0,
-        red: _currentColor.r * 255,
-        green: _currentColor.g * 255,
-        blue: _currentColor.b * 255,
-      );
-      final highColor = Color.from(
-        alpha: 1,
-        red: _currentColor.r * 255,
-        green: _currentColor.g * 255,
-        blue: _currentColor.b * 255,
-      );
-      log("${_currentColor.r * 255}");
+      final lowColor = _currentColor.withAlpha(0);
+      final highColor = _currentColor.withAlpha(255);
       return GestureDetector(
         onPanUpdate: (details) {
           setState(() {
