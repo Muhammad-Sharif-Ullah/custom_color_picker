@@ -248,6 +248,8 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
       builder: (context, constraints) {
         double width = constraints.maxWidth; // Full available width
         double height = 200; // Fixed height for the gradient square
+        double trackballRadius = 10; // Radius of the trackball
+        double trackballDiameter = trackballRadius * 2;
 
         return GestureDetector(
           onPanUpdate: (details) {
@@ -266,12 +268,13 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
               child: Stack(
                 children: [
                   Positioned(
-                    left:
-                        (_saturation * width) - 10, // Adjust trackball position
-                    top: ((1 - _brightness) * height) - 10,
+                    left: (_saturation * width - trackballRadius).clamp(0.0,
+                        width - trackballDiameter), // Adjust trackball position
+                    top: ((1 - _brightness) * height - trackballRadius)
+                        .clamp(0.0, height - trackballDiameter),
                     child: Container(
-                      width: 20,
-                      height: 20,
+                      width: trackballDiameter,
+                      height: trackballDiameter,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
@@ -299,6 +302,9 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
     return LayoutBuilder(builder: (context, constraints) {
       double width = constraints.maxWidth; // Full available width
       double height = 15; // Fixed height for the gradient square
+      double trackballRadius = 8; // Radius of the trackball
+      double trackballDiameter = trackballRadius * 2;
+
       return GestureDetector(
         onPanUpdate: (details) {
           setState(() {
@@ -314,10 +320,11 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
             child: Stack(
               children: [
                 Positioned(
-                  left: (_hue / 360) * width - 10, // Adjust trackball position
+                  left: ((_hue / 360) * width - trackballRadius).clamp(0.0,
+                      width - trackballDiameter), // Adjust trackball position
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: trackballDiameter,
+                    height: trackballDiameter,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
@@ -667,6 +674,21 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
     return LayoutBuilder(builder: (context, constraints) {
       double width = constraints.maxWidth; // Full available width
       double height = 15; // Fixed height for the gradient square
+      double trackballRadius = 8; // Radius of the trackball
+      double trackballDiameter = trackballRadius * 2;
+      final lowColor = Color.from(
+        alpha: 0,
+        red: _currentColor.r * 255,
+        green: _currentColor.g * 255,
+        blue: _currentColor.b * 255,
+      );
+      final highColor = Color.from(
+        alpha: 1,
+        red: _currentColor.r * 255,
+        green: _currentColor.g * 255,
+        blue: _currentColor.b * 255,
+      );
+      log("${_currentColor.r * 255}");
       return GestureDetector(
         onPanUpdate: (details) {
           setState(() {
@@ -678,21 +700,25 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
           width: width,
           height: height,
           child: CustomPaint(
-            painter: _GradientOpacityPainter(opacity: _opacity),
+            painter: _GradientOpacityPainter(
+              opacity: _opacity,
+              lowColor: lowColor,
+              highColor: highColor,
+            ),
             child: Stack(
               children: [
                 Positioned(
-                  left: (_opacity * width) - 10, // Adjust trackball position
+                  left: (_opacity * width - trackballRadius).clamp(0.0,
+                      width - trackballDiameter), // Adjust trackball position
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: trackballDiameter,
+                    height: trackballDiameter,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
-                      color: Colors.transparent,
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black26,
+                          color: _currentColor,
                           blurRadius: 4,
                           spreadRadius: 1,
                         )
@@ -711,8 +737,14 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
 
 class _GradientOpacityPainter extends CustomPainter {
   final double opacity;
+  final Color lowColor;
+  final Color highColor;
 
-  _GradientOpacityPainter({required this.opacity});
+  _GradientOpacityPainter({
+    required this.opacity,
+    required this.lowColor,
+    required this.highColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -722,10 +754,10 @@ class _GradientOpacityPainter extends CustomPainter {
     const double radius = 10.0;
 
     // Create the gradient from white -> hue color
-    const gradient = LinearGradient(
+    final gradient = LinearGradient(
       colors: [
-        Colors.transparent,
-        Colors.black,
+        lowColor,
+        highColor,
       ],
     );
 
